@@ -1,0 +1,195 @@
+{
+  "CPU": [
+    {
+      "Manufacturer": "GenuineIntel",
+      "Name": "Genuine Intel(R) CPU 0000 @ 1.50GHz",
+      "NumberOfCores": 10,
+      "NumberOfEnabledCore": 10,
+      "NumberOfLogicalProcessors": 20,
+      "ProcessorId": "BFEBFBFF000A0651",
+      "ThreadCount": 20,
+      "Family": 1,
+      "Description": "Intel64 Family 6 Model 165 Stepping 1",
+      "Caption": "Intel64 Family 6 Model 165 Stepping 1",
+      "Architecture": 9,
+      "DeviceID": "CPU0",
+      "ProcessorType": 3,
+      "SocketDesignation": "CPUSocket",
+      "MaxClockSpeed": 1501,
+      "VirtualizationFirmwareEnabled": false,
+      "Codename": "Unknown",
+      "SIMD Features": null
+    }
+  ],
+  "Motherboard": {
+    "Manufacturer": "ASRock",
+    "Model": "To Be Filled By O.E.M.",
+    "Name": "10900T",
+    "Product": "Z490M-ITX/ac",
+    "SerialNumber": "",
+    "Tag": "",
+    "Version": "",
+    "Chipset": "Z490",
+    "ChipsetDeviceID": "8086-0685",
+    "Platform": "Desktop"
+  },
+  "Monitor": null,
+  "Memory": [
+    {
+      "BankLabel": "BANK 0",
+      "Capacity": 17179869184,
+      "ConfiguredClockSpeed": 2933,
+      "DeviceLocator": "ChannelA-DIMM0",
+      "Manufacturer": "Kingston",
+      "MemoryType": 0,
+      "PartNumber": "KHX2666C16/16G      ",
+      "SerialNumber": "DE0302D4",
+      "SMBIOSMemoryType": 26,
+      "Speed": 2933
+    },
+    {
+      "BankLabel": "BANK 2",
+      "Capacity": 17179869184,
+      "ConfiguredClockSpeed": 2933,
+      "DeviceLocator": "ChannelB-DIMM0",
+      "Manufacturer": "Kingston",
+      "MemoryType": 0,
+      "PartNumber": "KHX2666C16/16G      ",
+      "SerialNumber": "DE0302CB",
+      "SMBIOSMemoryType": 26,
+      "Speed": 2933
+    }
+  ],
+  "Disk": [
+    {
+      "Model": "Lexar 1TB SSD",
+      "BusType": "NVMe",
+      "MediaType": "SSD",
+      "Size": 1000204886016,
+      "UniqueId": "126FLexar 1TB SSD                           0001J50411R002544",
+      "HealthStatus": "Healthy",
+      "FriendlyName": "Lexar 1TB SSD",
+      "Manufacturer": null,
+      "SerialNumber": "J50411R002544",
+      "PhysicalSectorSize": 4096,
+      "LogicalSectorSize": 512
+    },
+    {
+      "Model": "SSD",
+      "BusType": "USB",
+      "MediaType": "SSD",
+      "Size": 128035676160,
+      "UniqueId": "5000000000000001",
+      "HealthStatus": "Healthy",
+      "FriendlyName": "Hoodisk SSD",
+      "Manufacturer": "Hoodisk",
+      "SerialNumber": "439622119120",
+      "PhysicalSectorSize": 512,
+      "LogicalSectorSize": 512
+    },
+    {
+      "Model": "Colorful CN600 256GB 2CH",
+      "BusType": "NVMe",
+      "MediaType": "SSD",
+      "Size": 256060514304,
+      "UniqueId": "1DF5Colorful CN600 256GB 2CH                0001STB51K301248        ",
+      "HealthStatus": "Healthy",
+      "FriendlyName": "Colorful CN600 256GB 2CH",
+      "Manufacturer": null,
+      "SerialNumber": "STB51K301248        _00000001.",
+      "PhysicalSectorSize": 4096,
+      "LogicalSectorSize": 512
+    },
+    {
+      "Model": "FORESEE 128GB SSD",
+      "BusType": "SATA",
+      "MediaType": "SSD",
+      "Size": 128035676160,
+      "UniqueId": "502B2A021D1C1B1A",
+      "HealthStatus": "Healthy",
+      "FriendlyName": "FORESEE 128GB SSD",
+      "Manufacturer": null,
+      "SerialNumber": "H42463R000089",
+      "PhysicalSectorSize": 512,
+      "LogicalSectorSize": 512
+    },
+    {
+      "Model": "FORESEE 128GB SSD",
+      "BusType": "SATA",
+      "MediaType": "SSD",
+      "Size": 128035676160,
+      "UniqueId": "502B2A021D1C1B1A",
+      "HealthStatus": "Healthy",
+      "FriendlyName": "FORESEE 128GB SSD",
+      "Manufacturer": null,
+      "SerialNumber": "H42463R000083",
+      "PhysicalSectorSize": 512,
+      "LogicalSectorSize": 512
+    }
+  ],
+  "DiskController": null,
+  "GPU": {
+    "Intel(R) UHD Graphics 630": {
+      "Device ID": "8086-9BC5",
+      "Subsystem ID": "9BC51849",
+      "Manufacturer": "Intel",
+      "Codename": "Coffee Lake",
+      "Device Type": "核心显卡",
+      "ACPI Path": null,
+      "PCI Path": null,
+      "Bar Type": "65793",
+      "Above4GDecode": "1"
+    }
+  },
+  "Network": {
+    "Intel(R) Dual Band Wireless-AC 3168": {
+      "Bus Type": "PCI",
+      "Device ID": "8086-24FB",
+      "Subsystem ID": "21108086",
+      "ACPI Path": null,
+      "PCI Path": null,
+      "SubClass": null
+    },
+    "Intel(R) Ethernet Connection (11) I219-V": {
+      "Bus Type": "PCI",
+      "Device ID": "8086-0D4D",
+      "Subsystem ID": "0D4D1849",
+      "ACPI Path": null,
+      "PCI Path": null,
+      "SubClass": null
+    },
+    "Realtek Gaming 2.5GbE Family Controller": {
+      "Bus Type": "PCI",
+      "Device ID": "10EC-8125",
+      "Subsystem ID": "81681849",
+      "ACPI Path": null,
+      "PCI Path": null,
+      "SubClass": null
+    }
+  },
+  "Audio": {
+    "Realtek High Definition Audio": {
+      "Bus Type": "HDAUDIO",
+      "Device ID": "10EC-0B00",
+      "Subsystem ID": "18491204",
+      "Audio Endpoints": "[扬声器]",
+      "ACPI Path": null,
+      "PCI Path": null
+    }
+  },
+  "Bluetooth": null,
+  "USB": null,
+  "OperatingSystem": {
+    "Caption": "Microsoft Windows 11 专业版",
+    "CSName": "10900T",
+    "OSArchitecture": "64 位",
+    "BuildNumber": "26200",
+    "SerialNumber": "00331-10000-00001-AA126"
+  },
+  "System": null,
+  "BIOS": null,
+  "AHCI": true,
+  "SecureBoot": false,
+  "CSM": false,
+  "HPET": null
+}
