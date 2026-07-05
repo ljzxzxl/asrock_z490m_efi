@@ -95,8 +95,6 @@
 			<false/>
 			<key>AvoidRuntimeDefrag</key>
 			<true/>
-			<key>ClearTaskSwitchBit</key>
-			<false/>
 			<key>DevirtualiseMmio</key>
 			<true/>
 			<key>DisableSingleUser</key>
@@ -158,53 +156,41 @@
 				<data>
 				BwCbPg==
 				</data>
-				<key>AAPL,slot-name</key>
-				<string>Internal@0,2,0</string>
 				<key>device-id</key>
 				<data>
-				yJsAAA==
+				mz4AAA==
 				</data>
-				<key>device_type</key>
-				<string>VGA compatible controller</string>
-				<key>framebuffer-con0-busid</key>
+				<key>framebuffer-con0-alldata</key>
 				<data>
-				AAAAAA==
+				AQUJAAAEAADHAwAA
 				</data>
 				<key>framebuffer-con0-enable</key>
 				<data>
-				AQAAAA==
+				AAAAAA==
 				</data>
-				<key>framebuffer-con0-type</key>
+				<key>framebuffer-con1-alldata</key>
 				<data>
-				AAgAAA==
-				</data>
-				<key>framebuffer-con1-busid</key>
-				<data>
-				BgAAAA==
+				AgIGAAAIAADHAwAA
 				</data>
 				<key>framebuffer-con1-enable</key>
 				<data>
 				AQAAAA==
 				</data>
-				<key>framebuffer-con1-type</key>
+				<key>framebuffer-con2-alldata</key>
 				<data>
-				AAgAAA==
-				</data>
-				<key>framebuffer-con2-busid</key>
-				<data>
-				BAAAAA==
+				AwQHAAAEAADHAwAA
 				</data>
 				<key>framebuffer-con2-enable</key>
 				<data>
 				AQAAAA==
 				</data>
-				<key>framebuffer-con2-type</key>
-				<data>
-				AAQAAA==
-				</data>
 				<key>framebuffer-patch-enable</key>
 				<data>
 				AQAAAA==
+				</data>
+				<key>framebuffer-unifiedmem</key>
+				<data>
+				AAAAgA==
 				</data>
 				<key>hda-gfx</key>
 				<string>onboard-1</string>
@@ -612,9 +598,9 @@
 		<key>Debug</key>
 		<dict>
 			<key>AppleDebug</key>
-			<false/>
+			<true/>
 			<key>ApplePanic</key>
-			<false/>
+			<true/>
 			<key>DisableWatchDog</key>
 			<true/>
 			<key>DisplayDelay</key>
@@ -626,7 +612,7 @@
 			<key>SysReport</key>
 			<false/>
 			<key>Target</key>
-			<integer>0</integer>
+			<integer>65</integer>
 		</dict>
 		<key>Entries</key>
 		<array/>
@@ -740,7 +726,7 @@
 				AAAAAAAAAAAAAAAAAAA=
 				</data>
 				<key>boot-args</key>
-				<string>igfxonln=1</string>
+				<string>-v debug=0x100 keepsyms=1 igfxonln=1</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
@@ -848,18 +834,18 @@
 			<key>StartupPowerEvents</key>
 			<integer>0</integer>
 			<key>SystemProductName</key>
-			<string>iMac20,2</string>
+			<string>Macmini8,1</string>
 			<key>SystemSerialNumber</key>
-			<string>C02DHVZS046M</string>
+			<string>C07ODOB1SJYVX</string>
 			<key>SystemUUID</key>
-			<string>47C11523-6B6A-4BC3-A1A6-2592D9D6BF3A</string>
+			<string>DD0EADCF-32F8-45AD-9DE9-131D608CE989</string>
 		</dict>
 		<key>Generic</key>
 		<dict>
 			<key>AdviseFeatures</key>
 			<false/>
 			<key>MLB</key>
-			<string>C02040300J900001F</string>
+			<string>C07ODOB1SJYVXA8KEW</string>
 			<key>MaxBIOSVersion</key>
 			<false/>
 			<key>ProcessorType</key>
@@ -873,11 +859,11 @@
 			<key>SystemMemoryStatus</key>
 			<string>Auto</string>
 			<key>SystemProductName</key>
-			<string>iMac20,2</string>
+			<string>Macmini8,1</string>
 			<key>SystemSerialNumber</key>
-			<string>C02DHVZS046M</string>
+			<string>C07ODOB1SJYVX</string>
 			<key>SystemUUID</key>
-			<string>47C11523-6B6A-4BC3-A1A6-2592D9D6BF3A</string>
+			<string>DD0EADCF-32F8-45AD-9DE9-131D608CE989</string>
 		</dict>
 		<key>SMBIOS</key>
 		<dict>
@@ -894,9 +880,9 @@
 			<key>BoardManufacturer</key>
 			<string></string>
 			<key>BoardProduct</key>
-			<string>Mac-AF89B6D9451A490B</string>
+			<string>Mac-7BA5B2DFE22DDD8C</string>
 			<key>BoardSerialNumber</key>
-			<string>C02040300J900001F</string>
+			<string>C07ODOB1SJYVXA8KEW</string>
 			<key>BoardType</key>
 			<integer>10</integer>
 			<key>BoardVersion</key>
@@ -910,7 +896,7 @@
 			<key>ChassisType</key>
 			<integer>13</integer>
 			<key>ChassisVersion</key>
-			<string>Mac-AF89B6D9451A490B</string>
+			<string>Mac-7BA5B2DFE22DDD8C</string>
 			<key>FirmwareFeatures</key>
 			<data>
 			ZvCz/wgAAAA=
@@ -931,13 +917,13 @@
 			<key>SystemManufacturer</key>
 			<string></string>
 			<key>SystemProductName</key>
-			<string>iMac20,2</string>
+			<string>Macmini8,1</string>
 			<key>SystemSKUNumber</key>
 			<string>System SKU#</string>
 			<key>SystemSerialNumber</key>
-			<string>C02DHVZS046M</string>
+			<string>C07ODOB1SJYVX</string>
 			<key>SystemUUID</key>
-			<string>47C11523-6B6A-4BC3-A1A6-2592D9D6BF3A</string>
+			<string>DD0EADCF-32F8-45AD-9DE9-131D608CE989</string>
 			<key>SystemVersion</key>
 			<string>1.0</string>
 		</dict>
@@ -1223,8 +1209,6 @@
 			<false/>
 		</dict>
 		<key>ReservedMemory</key>
-		<array/>
-		<key>Unload</key>
 		<array/>
 	</dict>
 </dict>
