@@ -4,12 +4,27 @@
 ![OpenCore](https://img.shields.io/badge/OpenCore-1.0.0-green.svg)
 ![SMBIOS](https://img.shields.io/badge/SMBIOS-Macmini8,1-orange.svg)
 
+> **⚠️ 重要声明：纯核显环境专用 (iGPU-Only)**
+> 本 EFI 配置专为 **无独立显卡（仅使用 Intel UHD 630 核显）** 的环境打造。
+> SMBIOS 已配置为 `Macmini8,1` 以实现完美的 H.264/HEVC 硬件解码和多屏输出。如果你有独立显卡（如 RX 580），请不要直接使用本配置，否则可能会遇到黑屏或解码异常！
+
 This repository contains the OpenCore EFI configuration for the **ASRock Z490M-ITX/ac** motherboard, highly optimized for **10th Gen Intel CPUs (Comet Lake)** running strictly on Intel UHD Graphics 630 (No Discrete GPU).
 
 ## 🖥 Hardware Specifications
 
 | Component | Model / Details |
-| :--- | :--- |
+| :
+### 4. 🔌 USB 映射方案切换指南 (备选方案)
+当前 EFI 默认启用了 `USBToolBox.kext` + `UTBMap.kext` 的组合方案。这在大多数情况下运行良好。
+
+**备用原生方案（推荐在遇到 USB 睡眠唤醒问题或断连时启用）：**
+我们已经在 EFI 中预置了精确适配 15 端口限制的原生无代码驱动 `USBPorts.kext`（已洗白匹配 `Macmini8,1` 机型），但默认处于禁用状态。若当前方案不稳定，可随时无缝切换：
+1. 打开 OpenCore Configurator。
+2. 在 Kernel (内核) 设置中，**取消勾选** `USBToolBox.kext` 和 `UTBMap.kext` 以禁用它们。
+3. **勾选启用** `USBPorts.kext`。
+4. 保存重启，即可享用纯净的原生 15 端口映射体验。
+
+--- | :--- |
 | **Motherboard** | ASRock Z490M-ITX/ac |
 | **CPU** | Intel Core i9-10900T ES (QTB0) |
 | **IGPU** | Intel UHD Graphics 630 |
