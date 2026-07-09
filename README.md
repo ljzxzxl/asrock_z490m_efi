@@ -15,14 +15,14 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 | Component | Model / Details |
 | :
 ### 4. 🔌 USB 映射方案切换指南 (备选方案)
-当前 EFI 默认启用了 `USBToolBox.kext` + `UTBMap.kext` 的组合方案。这在大多数情况下运行良好。
+当前 EFI 默认启用了精确适配 15 端口限制的原生无代码驱动 `USBPorts.kext`（已洗白匹配 `Macmini8,1` 机型），带来纯净的原生映射体验。
 
-**备用原生方案（推荐在遇到 USB 睡眠唤醒问题或断连时启用）：**
-我们已经在 EFI 中预置了精确适配 15 端口限制的原生无代码驱动 `USBPorts.kext`（已洗白匹配 `Macmini8,1` 机型），但默认处于禁用状态。若当前方案不稳定，可随时无缝切换：
+**备用方案（推荐在遇到特定设备兼容性问题时启用）：**
+我们在 EFI 中保留了 `USBToolBox.kext` + `UTBMap.kext` 的组合方案，但默认处于禁用状态。若使用原生驱动遇到异常需要切换：
 1. 打开 OpenCore Configurator。
-2. 在 Kernel (内核) 设置中，**取消勾选** `USBToolBox.kext` 和 `UTBMap.kext` 以禁用它们。
-3. **勾选启用** `USBPorts.kext`。
-4. 保存重启，即可享用纯净的原生 15 端口映射体验。
+2. 在 Kernel (内核) 设置中，**取消勾选** `USBPorts.kext` 以禁用它。
+3. **勾选启用** `USBToolBox.kext` 和 `UTBMap.kext`。
+4. 保存重启，并建议在启动菜单重置一次 NVRAM。
 
 --- | :--- |
 | **Motherboard** | ASRock Z490M-ITX/ac |
@@ -38,7 +38,7 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 - [x] **Intel UHD 630 IGPU**: Dual display output via DisplayPort and HDMI.
 - [x] **Hardware Acceleration**: Full H.264 and HEVC (H.265) hardware decoding/encoding in VideoProc.
 - [x] **Audio**: Front and Rear ports working perfectly (`layout-id=69`).
-- [x] **USB Ports**: Custom mapped using `UTBMap.kext` under the 15-port limit.
+- [x] **USB Ports**: Custom mapped using native `USBPorts.kext` under the 15-port limit.
 - [x] **Sleep / Wake**: Native power management.
 - [x] **Wi-Fi & Bluetooth**: Functional natively (Requires configuring Intel/BCM kexts based on your specific card).
 
