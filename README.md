@@ -30,7 +30,7 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 | **IGPU** | Intel UHD Graphics 630 |
 | **Audio** | Realtek ALC892 |
 | **Network** | Realtek 2.5GbE (RTL8125BG) + Intel Gigabit (I219V) |
-| **Wi-Fi / BT** | Intel Dual Band Wireless-AC 3168 (or compatible swapped BCM card) |
+| **Wi-Fi / BT** | Dell DW1560 (Broadcom BCM94352Z) |
 | **Storage** | Lexar / Colorful NVMe, FORESEE SATA SSD |
 
 ## ✨ What Works
@@ -40,7 +40,7 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 - [x] **Audio**: Front and Rear ports working perfectly (`layout-id=69`).
 - [x] **USB Ports**: Custom mapped using native `USBPorts.kext` under the 15-port limit.
 - [x] **Sleep / Wake**: Native power management.
-- [x] **Wi-Fi & Bluetooth**: Functional natively (Requires configuring Intel/BCM kexts based on your specific card).
+- [x] **Wi-Fi & Bluetooth**: Native AirDrop and Handoff support via DW1560 (Broadcom kexts injected). Intel cards are also supported as a fallback.
 
 ---
 
@@ -87,6 +87,15 @@ We adopted the highly optimized ASRock Z490M-ITX IGPU configuration from the com
 - **Unified Memory Injection**: `framebuffer-unifiedmem` set to `AAAAgA==` (**2048MB**). Without this, initializing the HEVC engine causes an instant VRAM overflow and black screen.
 - **Precise BusID Mapping**: Mapped exact physical motherboard routing (`alldata`) for DP (`BusID 0x04`) and HDMI (`BusID 0x02`), ensuring both ports light up flawlessly.
 - **GuC Firmware**: `igfxfw=2` injected to force load Apple's graphics micro-controller firmware to enable the media engine.
+
+### 5. 📶 Wi-Fi & Bluetooth 方案切换 (Broadcom vs Intel)
+当前 EFI 默认配置为支持 **Dell DW1560 (Broadcom BCM94352Z)** 网卡，以实现原生的隔空投送 (AirDrop) 和接力 (Handoff) 体验。相关的 `AirportBrcmFixup.kext` 和 `BrcmPatchRAM3.kext` 均已在配置中激活。
+
+**如果你使用的是主板自带的 Intel 网卡（如 AC3168/AX200 等）：**
+请勿直接启动，否则会导致网卡无法识别或内核崩溃。请在 `config.plist` 中进行如下调整：
+1. **禁用 Broadcom 驱动**：在 Kernel -> Add 中，将 `BrcmFirmwareData.kext`、`BrcmPatchRAM3.kext`、`AirportBrcmFixup.kext` 及其 Injector 插件的 `Enabled` 设为 `False`。
+2. **启用 Intel 驱动**：在 Kernel -> Add 中，将 `AirportItlwm.kext`、`IntelBluetoothFirmware.kext` 和 `IntelBTPatcher.kext` 的 `Enabled` 设为 `True`。
+3. **移除引导参数**：在 NVRAM 的 `boot-args` 中，删除 `brcmfx-driver=2` 和 `brcmfx-country=#a`。
 
 ---
 
