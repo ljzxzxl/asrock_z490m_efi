@@ -591,6 +591,42 @@
 				<key>PlistPath</key>
 				<string>Contents/Info.plist</string>
 			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>RadeonSensor.kext</string>
+				<key>Comment</key>
+				<string>AMD GPU Temperature Sensor</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/RadeonSensor</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
+				<string>SMCRadeonGPU.kext</string>
+				<key>Comment</key>
+				<string>Export GPU Temp to VirtualSMC</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/SMCRadeonGPU</string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
 		</array>
 		<key>Block</key>
 		<array/>
@@ -842,7 +878,7 @@
 				AAAAAAAAAAAAAAAAAAA=
 				</data>
 				<key>boot-args</key>
-				<string>-v debug=0x100 keepsyms=1 igfxonln=1 brcmfx-driver=2 brcmfx-country=#a</string>
+				<string>-v debug=0x100 keepsyms=1 igfxonln=1 brcmfx-driver=2 brcmfx-country=#a agdpmod=pikera</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
@@ -924,10 +960,10 @@
 			<key>ARTFrequency</key>
 			<integer>0</integer>
 			<key>BoardProduct</key>
-			<string>Mac-7BA5B2DFE22DDD8C</string>
+			<string>Mac-AF89B6D9451A490B</string>
 			<key>BoardRevision</key>
 			<data>
-			AQ==
+			Aw==
 			</data>
 			<key>DevicePathsSupported</key>
 			<integer>0</integer>
@@ -942,7 +978,7 @@
 			</data>
 			<key>SmcPlatform</key>
 			<data>
-			ajE3NAAAAAA=
+			ajE4NWYAAAA=
 			</data>
 			<key>SmcRevision</key>
 			<data>
@@ -950,18 +986,18 @@
 			<key>StartupPowerEvents</key>
 			<integer>0</integer>
 			<key>SystemProductName</key>
-			<string>Macmini8,1</string>
+			<string>iMac20,2</string>
 			<key>SystemSerialNumber</key>
-			<string>C07XPTYBJYVX</string>
+			<string>C02D4088046M</string>
 			<key>SystemUUID</key>
-			<string>174E805E-4CC4-4F0B-AF9C-F7F5C2C9573A</string>
+			<string>1281D234-C693-4F9D-8A43-F9AB546AD954</string>
 		</dict>
 		<key>Generic</key>
 		<dict>
 			<key>AdviseFeatures</key>
 			<false/>
 			<key>MLB</key>
-			<string>C07846300J9KXPG8C</string>
+			<string>C020306094N00008C</string>
 			<key>MaxBIOSVersion</key>
 			<false/>
 			<key>ProcessorType</key>
@@ -975,11 +1011,11 @@
 			<key>SystemMemoryStatus</key>
 			<string>Auto</string>
 			<key>SystemProductName</key>
-			<string>Macmini8,1</string>
+			<string>iMac20,2</string>
 			<key>SystemSerialNumber</key>
-			<string>C07XPTYBJYVX</string>
+			<string>C02D4088046M</string>
 			<key>SystemUUID</key>
-			<string>174E805E-4CC4-4F0B-AF9C-F7F5C2C9573A</string>
+			<string>1281D234-C693-4F9D-8A43-F9AB546AD954</string>
 		</dict>
 		<key>SMBIOS</key>
 		<dict>
@@ -996,30 +1032,30 @@
 			<key>BoardManufacturer</key>
 			<string></string>
 			<key>BoardProduct</key>
-			<string>Mac-7BA5B2DFE22DDD8C</string>
+			<string>Mac-AF89B6D9451A490B</string>
 			<key>BoardSerialNumber</key>
-			<string>C07846300J9KXPG8C</string>
+			<string>C020306094N00008C</string>
 			<key>BoardType</key>
 			<integer>10</integer>
 			<key>BoardVersion</key>
-			<string>Macmini8,1</string>
+			<string>iMac20,2</string>
 			<key>ChassisAssetTag</key>
 			<string>Asset Tag#</string>
 			<key>ChassisManufacturer</key>
 			<string></string>
 			<key>ChassisSerialNumber</key>
-			<string>C07XPTYBJYVX</string>
+			<string>C02D4088046M</string>
 			<key>ChassisType</key>
-			<integer>16</integer>
+			<integer>13</integer>
 			<key>ChassisVersion</key>
-			<string>Mac-7BA5B2DFE22DDD8C</string>
+			<string>Mac-AF89B6D9451A490B</string>
 			<key>FirmwareFeatures</key>
 			<data>
-			ZvSP/QgAAAA=
+			ZvCz/wgAAAA=
 			</data>
 			<key>FirmwareFeaturesMask</key>
 			<data>
-			f//f/wgAAAA=
+			/////wgAAAA=
 			</data>
 			<key>PlatformFeature</key>
 			<integer>32</integer>
@@ -1029,17 +1065,17 @@
 			<data>
 			</data>
 			<key>SystemFamily</key>
-			<string>Mac mini</string>
+			<string>iMac</string>
 			<key>SystemManufacturer</key>
 			<string></string>
 			<key>SystemProductName</key>
-			<string>Macmini8,1</string>
+			<string>iMac20,2</string>
 			<key>SystemSKUNumber</key>
 			<string>System SKU#</string>
 			<key>SystemSerialNumber</key>
-			<string>C07XPTYBJYVX</string>
+			<string>C02D4088046M</string>
 			<key>SystemUUID</key>
-			<string>174E805E-4CC4-4F0B-AF9C-F7F5C2C9573A</string>
+			<string>1281D234-C693-4F9D-8A43-F9AB546AD954</string>
 			<key>SystemVersion</key>
 			<string>1.0</string>
 		</dict>
