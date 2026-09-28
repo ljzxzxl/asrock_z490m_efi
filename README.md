@@ -97,6 +97,59 @@ We adopted the highly optimized ASRock Z490M-ITX IGPU configuration from the com
 2. **启用 Intel 驱动**：在 Kernel -> Add 中，将 `AirportItlwm.kext`、`IntelBluetoothFirmware.kext` 和 `IntelBTPatcher.kext` 的 `Enabled` 设为 `True`。
 3. **移除引导参数**：在 NVRAM 的 `boot-args` 中，删除 `brcmfx-driver=2` 和 `brcmfx-country=#a`。
 
+#### macOS 15 Sequoia 上的额外要求（DW1560 / BCM94352Z）
+
+macOS 15 已从系统中彻底移除博通无线驱动（`/System/Library/Extensions/AirPortBrcm*.kext` 不存在，
+两个 KernelCollection 里也搜不到任何 `brcm` 条目）。此时单靠 `AirportBrcmFixup` + Injector 是**无效**的：
+Injector 注入的 personality 指向 `IOClass = AirPort_BrcmNIC`，而该类已不存在，
+设备会停在 `!matched, busy 1` 状态，导致 `kernelmanagerd` 连续 4 次 60 秒停摆
+（现象：verbose 跑完后黑屏约 4 分半，极易被误判为卡死）。
+
+本 EFI 已内置解决方案，由两部分组成：
+
+**1. EFI 侧注入内核驱动**（取自 OCLP-Mod `payloads/Kexts/Wifi/`，`MinKernel = 23.0.0`，macOS 13/14 不受影响）
+
+| kext | Bundle ID |
+| --- | --- |
+| `IOSkywalkFamily.kext` | `com.apple.iokit.IOSkywalkFamily` |
+| `IO80211FamilyLegacy.kext` | `com.apple.iokit.IO80211FamilyLegacy` |
+| └ `PlugIns/AirPortBrcmNIC.kext` | `com.apple.driver.AirPort.BrcmNIC` |
+
+同时 `Kernel -> Block` 中有一条 `com.apple.iokit.IOSkywalkFamily`（`Strategy = Exclude`，`MinKernel = 23.0.0`），
+用于排除系统自带的 Skywalk，让上面注入的旧版生效。
+`AirPortBrcmNIC.kext` 的 `IONameMatch` 不含 `14e4:43b1`，因此 `AirportBrcmFixup` +
+`AirPortBrcmNIC_Injector` 仍需保持启用来补这个 device id。
+
+**2. 系统侧 root patch（用户态）**
+
+用 [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) 打「网卡: BCM无线网卡」补丁，它只写入
+`IO80211.framework`、`WiFiPeerToPeer.framework`、`/usr/libexec/wifip2pd`，不涉及任何 kext。
+前置条件：`csr-active-config` 含 `CSR_ALLOW_UNAUTHENTICATED_ROOT (0x200)`，以及放开 AMFI ——
+本 EFI 采用 `AMFIPass.kext`（`MinKernel = 24.0.0`）而非 `amfi_get_out_of_my_way=0x1`，
+以避免全局关闭 AMFI。
+
+> ⚠️ **每次 macOS 更新都会冲掉 root patch**，届时无线失效，且上述停摆会复现。
+> 排查命令：`log show --last boot --predicate 'processID == 0' | grep 'stall\['`，
+> 有 `stall[...]: 'PXSX'` 输出就重打一次补丁。
+
+### 6. macOS 15 通用启动修复
+
+以下改动与显卡方案无关，本分支（集显方案）与 `imac` 分支（iMac20,2 + RX 580）均已应用：
+
+- **APFS 驱动版本错配**：原先靠手动放置的 `apfs_aligned.efi` 加载，其 APFS 版本会落后于被新系统
+  升级过的容器。改为 `UEFI -> APFS -> EnableJumpstart = True` 并停用 `apfs_aligned.efi`，
+  由容器自带的 apfs.efi 提供，版本永远匹配。
+- **verbose 输出慢**：`UEFI -> Output -> Resolution` 原为 `Max`，在 4K 显示器上使 EFI framebuffer
+  工作在 3840×2160，内核文字靠软件滚动。改为 `1920x1080@32`。`Max` 在本机还曾解析失败
+  （`Changed resolution to 0x0@0 ... from Max - Unsupported`）。
+- **清理无效项**：停用 `XHCI-unsupported.kext`（Z490 原生支持 XHCI）与 `USBWakeFixup.kext`（2018 年遗留）。
+- **诊断与耗时**：`PanicNoKextDump = False`（panic 时可见 kext 列表）、`Misc/Boot/Timeout` 5 → 2、
+  `SetApfsTrimTimeout` -1 → 1000000（TRIM 封顶 1 秒）。
+
+> 注意：`imac` 分支额外移除了 `igfxonln=1`（那边由 RX 580 出图，集显无显示器，强制 online 会造成
+> 每次启动多 5 秒 `IntelAccelerator waitForStamp` 超时）。**本分支是纯集显出图方案，`igfxonln=1` 必须保留。**
+
+
 ---
 
 ## ⚠️ Post-Installation Steps
@@ -107,7 +160,7 @@ This EFI comes with generated `Macmini8,1` serial numbers for testing, but they 
 2. Generate a valid `Macmini8,1` profile.
 3. Replace the `SystemSerialNumber`, `MLB`, and `SystemUUID` inside `config.plist -> PlatformInfo -> Generic`.
 
-*(Note: Currently, `AppleDebug` and `Target=65` are enabled in this EFI to capture boot logs (`opencore-xxxx.txt`) at the root of the EFI partition for further phase 2 system refinement. Please delete these logs periodically so your EFI partition does not run out of space, or set `Target=0` and disable `AppleDebug` when you are done troubleshooting.)*
+*(Note: Currently, `AppleDebug` and `Target=67` are enabled in this EFI to capture boot logs (`opencore-xxxx.txt`) at the root of the EFI partition for further phase 2 system refinement. Please delete these logs periodically so your EFI partition does not run out of space, or set `Target=0` and disable `AppleDebug` when you are done troubleshooting. Note that the log filename uses the firmware RTC, i.e. **UTC**, so it is 8 hours behind CST.)*
 
 ## Credits
 - [Acidanthera](https://github.com/acidanthera) for OpenCore and crucial kexts.
