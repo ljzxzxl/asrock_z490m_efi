@@ -37,7 +37,7 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 
 - [x] **Intel UHD 630 IGPU**: Dual display output via DisplayPort and HDMI.
 - [x] **Hardware Acceleration**: Full H.264 and HEVC (H.265) hardware decoding/encoding in VideoProc.
-- [x] **Audio**: Front and Rear ports working perfectly (`layout-id=69`).
+- [x] **Audio**: Realtek ALCS1200A with `layout-id=49`. Rear line-out, rear microphone (pink jack) and line-in verified. (`layout-id=69` routes the rear mic and the front-panel jack through the same ADC, so macOS only offers "Line In" and the microphone is unusable.)
 - [x] **USB Ports**: Custom mapped using native `USBPorts.kext` under the 15-port limit.
 - [x] **Sleep / Wake**: Native power management.
 - [x] **Wi-Fi & Bluetooth**: Native AirDrop and Handoff support via DW1560 (Broadcom kexts injected). Intel cards are also supported as a fallback.
