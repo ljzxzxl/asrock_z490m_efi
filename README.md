@@ -170,7 +170,44 @@ diskutil apfs list | grep "Snapshot Sealed"   # Yes
 - 可选启动参数：`sbcmdelay=<毫秒>` 延迟加载内嵌驱动、`-simplebcmoff` 整体禁用；
   `-sbcmawdlcc` / `-sbcmdma` 仅对 Tahoe 生效且默认关闭。
 
-官方配置片段、第三方许可与 kext 校验清单见 `Docs/SimpleBCM/`。
+#### 实机验证记录（2026-11-22）与临时快速验证路径
+
+本机当前 ESP 上的 `config.plist` 与仓库里的**正式版有意不同**：仓库是 `csr=0x803`、
+`AMFIPass` 禁用；ESP 上是「快速验证版」（副本存于
+`Docs/SimpleBCM/config.quicktest.plist`，md5 `125c04b6…`），仅临时保留 `csr=0xA03`
+与 `AMFIPass` 启用。原因是本机此前打过 OCLP-Mod 用户态 root patch，系统卷仍是
+`Snapshot Sealed: Broken`，直接上 `0x803` 会启用 authenticated-root 而无法进入系统。
+
+生成/部署该临时版的幂等脚本：`Tools/Deploy-SimpleBCM-QuickTest.sh`（派生临时 config、
+复用或新建 ESP 备份、同步并校验；不改仓库正式版、不动系统卷）。
+完整回退备份：`/Volumes/EFI/EFI-Backup-20261122-220244`（旧 OCLP-Mod 配置）。
+
+**2026-11-22 22:09 重启实测**（未 Reset NVRAM，macOS 15.8.2 / 24H232）：
+
+| 检查 | 结果 |
+| --- | --- |
+| `kmutil showloaded` | `cn.laobamac.SimpleBCM (1.2.0)` + 原生 `com.apple.iokit.IO80211Family (1200.13.1)` + `IOSkywalkFamily (1.0)`；旧的 `IO80211FamilyLegacy` / `AirPort.BrcmNIC` 不再加载 |
+| Wi-Fi | `en2` 已连接 `192.168.31.113`，`Status: Connected`，`AirDrop: Supported`、`Auto Unlock: Supported` |
+| 蓝牙 | `State: On`，firmware `v8718 c5668` |
+| 有线 | `en0` `192.168.31.40` active（另一口未接线） |
+| 启动日志 | 无 `stall[...] 'PXSX'`，旧的 4 分半黑屏停摆未复现 |
+| NVRAM / 系统卷 | `csr-active-config=0xA03`（与临时 config 一致，故无需 Reset NVRAM）；封印仍 `Broken`、`authenticated-root disabled` |
+
+> 该结果只证明「SimpleBCM + 原生 Skywalk」在本机可正常驱动无线，
+> **不等于正式版验证通过**：系统里仍残留 11-01 的 OCLP-Mod 用户态 framework 补丁，
+> 与原生栈混用可能影响 AirDrop / Handoff / 随航，这些仍需人工实测。
+
+**正式收尾（仍需人工，需 GUI 与管理员权限）**
+
+1. 装回 `~/Downloads/OCLP-Mod.pkg` → `Post Install Root Patch` → `Revert Root Patches`；
+   或原地重装 macOS 15.8.2（保留数据）。重启后确认 `diskutil apfs list` 显示 `Snapshot Sealed: Yes`。
+2. 执行 `Tools/Apply-SimpleBCM-EFI.sh`：它会用仓库正式版（`csr=0x803`）覆盖 ESP，并再次检查封印。
+3. 启动菜单 Reset NVRAM 后重启，按上面的验证清单复查（此时 `authenticated-root` 应为 `enabled`）。
+
+快速验证版随时可回退：`Tools/Rollback-SimpleBCM-EFI.sh /Volumes/EFI/EFI-Backup-20261122-220244`。
+若进不了 macOS，需在恢复模式挂载 ESP，把备份里的 `OC/config.plist` 拷回 `EFI/OC/config.plist`。
+
+官方配置片段、第三方许可、kext 校验清单与已验证的快速版 config 见 `Docs/SimpleBCM/`。
 
 
 ---
