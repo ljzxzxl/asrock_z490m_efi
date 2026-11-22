@@ -120,31 +120,44 @@ Sequoia / Tahoe 上有实机成功案例。
 | 加载顺序 | `Lilu → AirportBrcmFixup → SimpleBCM → AirPortBrcmNIC_Injector`（官方 `Extra/config.AirportBrcmFixup.fragment.plist` 指定） |
 | `IOSkywalkFamily.kext` / `IO80211FamilyLegacy.kext` / 其 `AirPortBrcmNIC.kext` 插件 | `Enabled=false`；文件保留作回退，**必须禁用，否则 Panic** |
 | `Kernel → Block` 的 `com.apple.iokit.IOSkywalkFamily` (Exclude) | `Enabled=false`，原生 Skywalk 必须加载 |
-| `AMFIPass.kext` | `Enabled=false`，不再需要 |
-| `csr-active-config` | `0xA03 → 0x803`（去掉 `CSR_ALLOW_UNAUTHENTICATED_ROOT`） |
+| `AMFIPass.kext` | **保持启用**：系统卷仍残留 OCLP-Mod 用户态补丁，需要它放行 AMFI；只有恢复封印后才可禁用 |
+| `csr-active-config` | **保持 `0xA03`**：不启用 authenticated-root，封印破损也能启动；恢复封印后可选收紧为 `0x803` |
 | `boot-args` | 不变，`brcmfx-driver=2 brcmfx-country=#a` 继续供 Fixup 使用 |
 | `DisableIoMapper` | 保持 `true`（BIOS 中 VT-d 为 Disable，见 BIOS 章节） |
 | 蓝牙三件套 + NVRAM 蓝牙变量 | 完全不变 |
 
-> 收益：系统更新不再冲掉无线；封印恢复后可增量 OTA；原生 Skywalk 正常工作，
-> RTL8125BG 2.5G 与 I219V 不再受降级影响；随航 / 隔空等功能可用（OCLP 方案随航会黑屏）。
+> 收益：系统更新不再冲掉无线；原生 Skywalk 正常工作，RTL8125BG 2.5G 与 I219V
+> 不再受降级影响；随航 / 隔空等功能可用（OCLP 方案随航会黑屏）。
 
-**⚠️ 迁移前置：必须先恢复系统卷封印**
+**当前状态就是最终方案，日常无需运行任何脚本**
 
-`config.plist` 里的 `csr=0x803` 会重新启用 authenticated-root。若系统卷仍是
-`Snapshot Sealed: Broken`（当前 `imac` 分支打过 root patch），**直接换本 EFI 会无法启动**。
-请先用**旧 EFI** 启动一次并完成：
+ESP 上的 `config.plist` 与仓库 `EFI/OC/config.plist` 逐字节一致，且已实机验证
+（见下方验证记录）。SimpleBCM 不依赖系统卷状态 —— **不需要恢复封印、不需要装回
+OCLP-Mod、不需要 Reset NVRAM**。
+
+**可选进阶：恢复系统卷封印并收紧 SIP（非必需）**
+
+不恢复封印的取舍：系统卷仍是 `Snapshot Sealed: Broken`、SIP 为自定义配置、
+`authenticated-root disabled`；macOS 更新只能下载完整安装器（不能增量 OTA）；
+系统里残留的 11-01 用户态补丁可能与原生栈混用，影响部分 Continuity 功能。
+这些都不影响 SimpleBCM 驱动无线。
+
+若哪天想清掉这些历史包袱，装回 OCLP-Mod **只是借用它的「删除已安装的补丁」
+功能**，不是退回 OCLP 方案：
 
 1. 装回 [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) → `Post Install Root Patch`
-   → `Revert Root Patches`（中文界面为「删除已安装的补丁」），回退到最近一次封印快照；
-   或直接原地重装 macOS 15.8.2（保留数据）。
-2. 重启，确认 `diskutil apfs list` 中 `Snapshot Sealed: Yes`。
-3. 再执行 `Tools/Apply-SimpleBCM-EFI.sh`（脚本会强制检查封印状态，未恢复则拒绝同步）。
+   → `Revert Root Patches`（回退到封印快照），完成后可再次卸载；
+   或原地重装 macOS 15.8.2（保留数据）。
+2. 重启，确认 `diskutil apfs list` 显示 `Snapshot Sealed: Yes`。
+3. 把 `config.plist` 的 `csr-active-config` 收紧为 `0x803`，`AMFIPass.kext` 设为 `Enabled=false`。
+4. 执行 `Tools/Apply-SimpleBCM-EFI.sh` 把改动同步到 ESP（此时才需要跑这个脚本，
+   它会在 `csr=0x803` 时强制检查封印），再 Reset NVRAM 重启。
 
-脚本会复用 ESP 上已有的完整 EFI 备份（ESP 通常只有 200MB，避免多份备份占满空间；
-可用 `NEW_BACKUP=1` 强制新建、`REUSE_BACKUP=<目录>` 指定某一份），再同步 `BOOT/` 与 `OC/`
-（不删除 ESP 上已有的 config 备份、日志与 `.comate` 文档），最后校验 `config.plist`
-与 kext 完整性。重置 NVRAM 后重启即可让 `csr=0x803` 生效。
+**`Tools/Apply-SimpleBCM-EFI.sh` 是干什么的**：它只是一个「把仓库 EFI 同步到 ESP」的
+部署工具 —— 校验 config、复用/新建整份 ESP 备份、rsync 同步 `BOOT/` 与 `OC/`、
+校验结果。**只有改了 config 或走上面的可选进阶时才需要运行**；当前 ESP 与仓库已一致，
+不需要跑。脚本不修改系统卷，也不删除 ESP 上已有的 config 备份、日志与 `.comate`
+文档（`NEW_BACKUP=1` / `REUSE_BACKUP=<目录>` 可控制备份行为）。
 
 **验证清单**
 
@@ -152,8 +165,8 @@ Sequoia / Tahoe 上有实机成功案例。
 kmutil showloaded | grep -iE "simplebcm|skywalk|80211|brcm|amfipass"
 system_profiler SPAirPortDataType      # WiFi 已连接、AirDrop / Auto Unlock Supported
 system_profiler SPBluetoothDataType   # State: On
-csrutil authenticated-root status     # enabled
-diskutil apfs list | grep "Snapshot Sealed"   # Yes
+csrutil authenticated-root status     # disabled（当前方案预期）
+diskutil apfs list | grep "Snapshot Sealed"   # Broken（当前方案预期）
 ```
 
 另外实测 AirDrop 双向、Handoff、睡眠唤醒后自动重连、RTL8125 / I219V 有线网络。
@@ -166,22 +179,12 @@ diskutil apfs list | grep "Snapshot Sealed"   # Yes
 
 - v1.2.0 存在「互联网共享 / 把有线共享成 WiFi 热点」导致黑屏重启的 bug，作者确认将在
   v1.2.1 正式版修复（[远景反馈帖](https://bbs.pcbeta.com/viewthread-2084816-1-1.html)）。
-  OCLP 方案下该功能可用 —— 如果依赖热点，请暂缓迁移。
+  本机不使用该功能，可忽略；若以后需要热点，等 1.2.1 正式版发布后再升级。
 - 不要使用 `v1.2.1-alpha`；作者已宣布 1.2.1 正式版会改回双 kext 架构。
 - 可选启动参数：`sbcmdelay=<毫秒>` 延迟加载内嵌驱动、`-simplebcmoff` 整体禁用；
   `-sbcmawdlcc` / `-sbcmdma` 仅对 Tahoe 生效且默认关闭。
 
-#### 实机验证记录（2026-11-22）与临时快速验证路径
-
-本机当前 ESP 上的 `config.plist` 与仓库里的**正式版有意不同**：仓库是 `csr=0x803`、
-`AMFIPass` 禁用；ESP 上是「快速验证版」（副本存于
-`Docs/SimpleBCM/config.quicktest.plist`，md5 `125c04b6…`），仅临时保留 `csr=0xA03`
-与 `AMFIPass` 启用。原因是本机此前打过 OCLP-Mod 用户态 root patch，系统卷仍是
-`Snapshot Sealed: Broken`，直接上 `0x803` 会启用 authenticated-root 而无法进入系统。
-
-生成/部署该临时版的幂等脚本：`Tools/Deploy-SimpleBCM-QuickTest.sh`（派生临时 config、
-复用或新建 ESP 备份、同步并校验；不改仓库正式版、不动系统卷）。
-完整回退备份：`/Volumes/EFI/EFI-Backup-20261122-220244`（旧 OCLP-Mod 配置）。
+#### 实机验证记录（2026-11-22）：当前即最终方案
 
 **2026-11-22 22:09 重启实测**（未 Reset NVRAM，macOS 15.8.2 / 24H232）：
 
@@ -192,23 +195,22 @@ diskutil apfs list | grep "Snapshot Sealed"   # Yes
 | 蓝牙 | `State: On`，firmware `v8718 c5668` |
 | 有线 | `en0` `192.168.31.40` active（另一口未接线） |
 | 启动日志 | 无 `stall[...] 'PXSX'`，旧的 4 分半黑屏停摆未复现 |
-| NVRAM / 系统卷 | `csr-active-config=0xA03`（与临时 config 一致，故无需 Reset NVRAM）；封印仍 `Broken`、`authenticated-root disabled` |
+| NVRAM / 系统卷 | `csr-active-config=0xA03`（与 config 一致，故无需 Reset NVRAM）；封印仍 `Broken`、`authenticated-root disabled` |
 
-> 该结果只证明「SimpleBCM + 原生 Skywalk」在本机可正常驱动无线，
-> **不等于正式版验证通过**：系统里仍残留 11-01 的 OCLP-Mod 用户态 framework 补丁，
-> 与原生栈混用可能影响 AirDrop / Handoff / 随航，这些仍需人工实测。
+> 该结果证明「SimpleBCM + 原生 Skywalk」在本机可正常驱动无线与蓝牙。
+> 系统里仍残留 11-01 的 OCLP-Mod 用户态 framework 补丁，与原生栈混用可能影响
+> AirDrop / Handoff / 随航，这些仍需人工实测；如确有功能异常，再考虑走上面的
+> 可选进阶恢复封印后重测。
 
-**正式收尾（仍需人工，需 GUI 与管理员权限）**
+**当前状态**：仓库 `EFI/OC/config.plist` 已对齐为上面这份已验证配置
+（`csr=0xA03`、`AMFIPass` 启用），与 ESP 逐字节一致（md5 `40fc9bdf…`）。
+没有「临时版 / 正式版」两套，也没有待执行的收尾步骤。
 
-1. 装回 `~/Downloads/OCLP-Mod.pkg` → `Post Install Root Patch` → `Revert Root Patches`；
-   或原地重装 macOS 15.8.2（保留数据）。重启后确认 `diskutil apfs list` 显示 `Snapshot Sealed: Yes`。
-2. 执行 `Tools/Apply-SimpleBCM-EFI.sh`：它会用仓库正式版（`csr=0x803`）覆盖 ESP，并再次检查封印。
-3. 启动菜单 Reset NVRAM 后重启，按上面的验证清单复查（此时 `authenticated-root` 应为 `enabled`）。
+**回退**：`Tools/Rollback-SimpleBCM-EFI.sh /Volumes/EFI/EFI-Backup-20261122-220244`
+（旧 OCLP-Mod 配置）。若进不了 macOS，在恢复模式挂载 ESP，把备份里的
+`OC/config.plist` 拷回 `EFI/OC/config.plist`。
 
-快速验证版随时可回退：`Tools/Rollback-SimpleBCM-EFI.sh /Volumes/EFI/EFI-Backup-20261122-220244`。
-若进不了 macOS，需在恢复模式挂载 ESP，把备份里的 `OC/config.plist` 拷回 `EFI/OC/config.plist`。
-
-官方配置片段、第三方许可、kext 校验清单与已验证的快速版 config 见 `Docs/SimpleBCM/`。
+官方配置片段、第三方许可与 kext 校验清单见 `Docs/SimpleBCM/`。
 
 
 ---

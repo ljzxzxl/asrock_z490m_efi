@@ -579,7 +579,7 @@
 				<key>BundlePath</key>
 				<string>AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcmNIC_Injector.kext</string>
 				<key>Comment</key>
-				<string>Injects 14e4:43b1 personality - now backed by real AirPortBrcmNIC kext</string>
+				<string>Injects 14e4:43b1 personality - now backed by SimpleBCM</string>
 				<key>Enabled</key>
 				<true/>
 				<key>ExecutablePath</key>
@@ -651,9 +651,9 @@
 				<key>BundlePath</key>
 				<string>AMFIPass.kext</string>
 				<key>Comment</key>
-				<string>Disabled: only needed for OCLP root patches (SimpleBCM needs none)</string>
+				<string>Enabled: system volume still carries OCLP-Mod userland patches; AMFI bypass needed until root patches are reverted</string>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AMFIPass</string>
 				<key>MaxKernel</key>
@@ -988,7 +988,7 @@
 				<string>-v debug=0x100 keepsyms=1 agdpmod=pikera brcmfx-driver=2 brcmfx-country=#a</string>
 				<key>csr-active-config</key>
 				<data>
-				AwgAAA==
+				AwoAAA==
 				</data>
 				<key>prev-lang:kbd</key>
 				<data>
