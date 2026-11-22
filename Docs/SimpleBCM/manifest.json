@@ -1,0 +1,25 @@
+{
+  "version": "1.2.0",
+  "configuration": "Release",
+  "files": {
+    "README.en.md": "951e3387fb4edf4ac08413bcf1c5a679ad5614e9960e7345e03306492989e352",
+    "config.fragment.plist": "8e55c5f9e66a62da2fbbb9405220257eef213d3c29deff1f893c6b82c219e9c0",
+    "README.md": "01bd1aa46913906d17d14ccce4cb6c64d4c075e2e67430ef17f832907ef08cbd",
+    "NOTICE.md": "3bab2c4d935ebf4f1608c813705cacaeba77e2fcbdcb0d020d21662831ad512f",
+    "Docs/Build.md": "9a921cb2585447128b1a4e7235d3039cd75b4a8d9580ea0f9f15ec63f9e87326",
+    "Docs/Native-Universal.md": "f905b8bc035260d150639cdef2be8571dc8868e7d046e904d663d94decfe521c",
+    "Extra/collect.py": "294f022ea57bbfa41ed740cc44de8a72a144ad64329561fdae88bf596cd66ac7",
+    "Extra/config.AirportBrcmFixup.fragment.plist": "5350ef9ab9eead978905098e77a79e7905094d53f6887cd85f0f1e25d104b792",
+    "Extra/Validation.json": "4ab5358966d9876ee3762babc07064587ed4f469461d64172badecdbed8fc734",
+    "Extra/OCLP-LICENSE.txt": "88a5f6b6b3fa4ee9578cbc352c64b4e1a74b834a3070fcb176da514a0100eab1",
+    "Extra/bcmprobe": "5dc35fd9358bef501d662561b5f413e6a301c52ef82fba3ed22cc010f5bf9361",
+    "EFI/OC/Kexts/SimpleBCM.kext/Contents/Info.plist": "086e0c57426e5e1ff2fcae8a011c67990e1f986fc095ef6f73c11ebd0c87989b",
+    "EFI/OC/Kexts/SimpleBCM.kext/Contents/MacOS/SimpleBCM": "08ecab974903a33b6376bb2236c4a47f2e67341ca94d21122530499e150ac929",
+    "Extra/SimpleBCM.kext.dSYM/Contents/Info.plist": "7d4f5cbfc9fd206ff01e5569bb54a4a6355049622473785def83eb988a947caa",
+    "Extra/SimpleBCM.kext.dSYM/Contents/Resources/DWARF/SimpleBCM": "8cb8d16212887c56d4b628eaa27ace68d153e2ae6cbd4ffaf1b116a0df0ad901",
+    "Extra/SimpleBCM.kext.dSYM/Contents/Resources/Relocations/x86_64/SimpleBCM.yml": "0036cafd4f20d9e87efa7b79d49a53d33f4bc72a153770b435520cf9472d5f19"
+  },
+  "hardwareValidation": "not-run-by-build",
+  "driverLoading": "embedded",
+  "skywalkBackend": "native"
+}

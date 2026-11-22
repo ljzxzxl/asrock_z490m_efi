@@ -40,7 +40,7 @@ This repository contains the OpenCore EFI configuration for the **ASRock Z490M-I
 - [x] **Audio**: Realtek ALCS1200A with `layout-id=49`. Rear line-out, rear microphone (pink jack) and line-in verified. (`layout-id=69` routes the rear mic and the front-panel jack through the same ADC, so macOS only offers "Line In" and the microphone is unusable.)
 - [x] **USB Ports**: Custom mapped using native `USBPorts.kext` under the 15-port limit.
 - [x] **Sleep / Wake**: Native power management.
-- [x] **Wi-Fi & Bluetooth**: Native AirDrop and Handoff support via DW1560 (Broadcom kexts injected). Intel cards are also supported as a fallback.
+- [x] **Wi-Fi & Bluetooth**: Native AirDrop / Handoff / Sidecar via DW1560 on **SimpleBCM 1.2.0** (no root patch, no `IOSkywalkFamily` downgrade). Intel cards remain available as a disabled fallback.
 
 ---
 
@@ -89,48 +89,88 @@ We adopted the highly optimized ASRock Z490M-ITX IGPU configuration from the com
 - **GuC Firmware**: `igfxfw=2` injected to force load Apple's graphics micro-controller firmware to enable the media engine.
 
 ### 5. 📶 Wi-Fi & Bluetooth 方案切换 (Broadcom vs Intel)
-当前 EFI 默认配置为支持 **Dell DW1560 (Broadcom BCM94352Z)** 网卡，以实现原生的隔空投送 (AirDrop) 和接力 (Handoff) 体验。相关的 `AirportBrcmFixup.kext` 和 `BrcmPatchRAM3.kext` 均已在配置中激活。
+当前 EFI 默认配置为支持 **Dell DW1560 (Broadcom BCM94352Z, `14e4:43b1`)** 网卡，以实现原生的隔空投送 (AirDrop)、接力 (Handoff) 与随航 (Sidecar)。WiFi 由 `SimpleBCM.kext` 驱动；蓝牙仍由 `BrcmPatchRAM3` / `BrcmFirmwareData` / `BlueToolFixup` 三件套驱动，与 WiFi 方案互相独立。
 
 **如果你使用的是主板自带的 Intel 网卡（如 AC3168/AX200 等）：**
 请勿直接启动，否则会导致网卡无法识别或内核崩溃。请在 `config.plist` 中进行如下调整：
-1. **禁用 Broadcom 驱动**：在 Kernel -> Add 中，将 `BrcmFirmwareData.kext`、`BrcmPatchRAM3.kext`、`AirportBrcmFixup.kext` 及其 Injector 插件的 `Enabled` 设为 `False`。
+1. **禁用 Broadcom 驱动**：在 Kernel -> Add 中，将 `SimpleBCM.kext`、`BrcmFirmwareData.kext`、`BrcmPatchRAM3.kext`、`BlueToolFixup.kext`、`AirportBrcmFixup.kext` 及其 Injector 插件的 `Enabled` 设为 `False`。
 2. **启用 Intel 驱动**：在 Kernel -> Add 中，将 `AirportItlwm.kext`、`IntelBluetoothFirmware.kext` 和 `IntelBTPatcher.kext` 的 `Enabled` 设为 `True`。
 3. **移除引导参数**：在 NVRAM 的 `boot-args` 中，删除 `brcmfx-driver=2` 和 `brcmfx-country=#a`。
 
-#### macOS 15 Sequoia 上的额外要求（DW1560 / BCM94352Z）
+#### macOS 14/15/26 上的无线方案：SimpleBCM 1.2.0（本分支）
 
-macOS 15 已从系统中彻底移除博通无线驱动（`/System/Library/Extensions/AirPortBrcm*.kext` 不存在，
-两个 KernelCollection 里也搜不到任何 `brcm` 条目）。此时单靠 `AirportBrcmFixup` + Injector 是**无效**的：
-Injector 注入的 personality 指向 `IOClass = AirPort_BrcmNIC`，而该类已不存在，
-设备会停在 `!matched, busy 1` 状态，导致 `kernelmanagerd` 连续 4 次 60 秒停摆
-（现象：verbose 跑完后黑屏约 4 分半，极易被误判为卡死）。
+macOS 14 起 Apple 移除了旧博通驱动，本仓库 `imac` 分支原先采用 OCLP-Mod 方案：
+EFI 注入 `IOSkywalkFamily.kext` (1.0) + `IO80211FamilyLegacy.kext` + `AirPortBrcmNIC.kext`、
+`Kernel → Block` 排除系统原生 Skywalk，配合 `AMFIPass.kext` 与用户态 root patch
+（`IO80211.framework`、`WiFiPeerToPeer.framework`、`/usr/libexec/wifip2pd`）。
+该方案每次系统更新都会被冲掉，无线失效并复现约 4 分半的 PXSX 黑屏停摆，
+且系统卷封印被破坏（`Snapshot Sealed: Broken`），只能下载完整安装器做更新。
 
-本 EFI 已内置解决方案，由两部分组成：
+本分支改用 [SimpleBCM](https://github.com/laobamac/SimpleBCM) **v1.2.0 正式版**（RELEASE 包，
+非 1.2.1-alpha）：单个 Lilu 插件内嵌 Legacy / AirPort 载荷，直接适配各系统**原生**
+`IOSkywalkFamily`，不改系统卷、不需要 root patch。同款 DW1560 (`14e4:43b1`) 已在
+Sequoia / Tahoe 上有实机成功案例。
 
-**1. EFI 侧注入内核驱动**（均取自 OCLP-Mod `payloads/Kexts/Wifi/`，`MinKernel = 23.0.0`，macOS 13/14 不受影响）
+**config.plist 净变化**
 
-| kext | Bundle ID |
+| 项 | 状态 |
 | --- | --- |
-| `IOSkywalkFamily.kext` | `com.apple.iokit.IOSkywalkFamily` |
-| `IO80211FamilyLegacy.kext` | `com.apple.iokit.IO80211FamilyLegacy` |
-| └ `PlugIns/AirPortBrcmNIC.kext` | `com.apple.driver.AirPort.BrcmNIC` |
+| `SimpleBCM.kext` | 新增并启用，`MinKernel=23.0.0` / `MaxKernel=25.99.99` |
+| `AirportBrcmFixup.kext` + `AirPortBrcmNIC_Injector.kext` | 保留（43b1 需要注入 personality） |
+| 加载顺序 | `Lilu → AirportBrcmFixup → SimpleBCM → AirPortBrcmNIC_Injector`（官方 `Extra/config.AirportBrcmFixup.fragment.plist` 指定） |
+| `IOSkywalkFamily.kext` / `IO80211FamilyLegacy.kext` / 其 `AirPortBrcmNIC.kext` 插件 | `Enabled=false`；文件保留作回退，**必须禁用，否则 Panic** |
+| `Kernel → Block` 的 `com.apple.iokit.IOSkywalkFamily` (Exclude) | `Enabled=false`，原生 Skywalk 必须加载 |
+| `AMFIPass.kext` | `Enabled=false`，不再需要 |
+| `csr-active-config` | `0xA03 → 0x803`（去掉 `CSR_ALLOW_UNAUTHENTICATED_ROOT`） |
+| `boot-args` | 不变，`brcmfx-driver=2 brcmfx-country=#a` 继续供 Fixup 使用 |
+| `DisableIoMapper` | 保持 `true`（BIOS 中 VT-d 为 Disable，见 BIOS 章节） |
+| 蓝牙三件套 + NVRAM 蓝牙变量 | 完全不变 |
 
-同时 `Kernel -> Block` 中有一条 `com.apple.iokit.IOSkywalkFamily`（`Strategy = Exclude`，`MinKernel = 23.0.0`），
-用于排除系统自带的 Skywalk，让上面注入的旧版生效。
-`AirPortBrcmNIC.kext` 的 `IONameMatch` 不含 `14e4:43b1`，因此 `AirportBrcmFixup` +
-`AirPortBrcmNIC_Injector` 仍需保持启用来补这个 device id。
+> 收益：系统更新不再冲掉无线；封印恢复后可增量 OTA；原生 Skywalk 正常工作，
+> RTL8125BG 2.5G 与 I219V 不再受降级影响；随航 / 隔空等功能可用（OCLP 方案随航会黑屏）。
 
-**2. 系统侧 root patch（用户态）**
+**⚠️ 迁移前置：必须先恢复系统卷封印**
 
-用 [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) 打「网卡: BCM无线网卡」补丁，它只写入
-`IO80211.framework`、`WiFiPeerToPeer.framework`、`/usr/libexec/wifip2pd`，不涉及任何 kext。
-前置条件：`csr-active-config` 含 `CSR_ALLOW_UNAUTHENTICATED_ROOT (0x200)`，以及放开 AMFI ——
-本 EFI 采用 `AMFIPass.kext`（`MinKernel = 24.0.0`）而非 `amfi_get_out_of_my_way=0x1`，
-以避免全局关闭 AMFI。
+`config.plist` 里的 `csr=0x803` 会重新启用 authenticated-root。若系统卷仍是
+`Snapshot Sealed: Broken`（当前 `imac` 分支打过 root patch），**直接换本 EFI 会无法启动**。
+请先用**旧 EFI** 启动一次并完成：
 
-> ⚠️ **每次 macOS 更新都会冲掉 root patch**，届时无线失效，且上述停摆会复现。
-> 排查命令：`log show --last boot --predicate 'processID == 0' | grep 'stall\['`，
-> 有 `stall[...]: 'PXSX'` 输出就重打一次补丁。
+1. 装回 [OCLP-Mod](https://github.com/laobamac/OCLP-Mod) → `Post Install Root Patch`
+   → `Revert Root Patches`（中文界面为「删除已安装的补丁」），回退到最近一次封印快照；
+   或直接原地重装 macOS 15.8.2（保留数据）。
+2. 重启，确认 `diskutil apfs list` 中 `Snapshot Sealed: Yes`。
+3. 再执行 `Tools/Apply-SimpleBCM-EFI.sh`（脚本会强制检查封印状态，未恢复则拒绝同步）。
+
+脚本会先整份备份 ESP 上的 EFI，再同步 `BOOT/` 与 `OC/`（不删除 ESP 上已有的 config
+备份、日志与 `.comate` 文档），最后校验 `config.plist` 与 kext 完整性。
+重置 NVRAM 后重启即可让 `csr=0x803` 生效。
+
+**验证清单**
+
+```sh
+kmutil showloaded | grep -iE "simplebcm|skywalk|80211|brcm|amfipass"
+system_profiler SPAirPortDataType      # WiFi 已连接、AirDrop / Auto Unlock Supported
+system_profiler SPBluetoothDataType   # State: On
+csrutil authenticated-root status     # enabled
+diskutil apfs list | grep "Snapshot Sealed"   # Yes
+```
+
+另外实测 AirDrop 双向、Handoff、睡眠唤醒后自动重连、RTL8125 / I219V 有线网络。
+
+**回退**：`Tools/Rollback-SimpleBCM-EFI.sh /Volumes/EFI/EFI-Backup-<时间戳>`。
+注意回退到 OCLP 方案后，若系统卷已 revert，需重新用 OCLP-Mod 打网卡 root patch，
+否则无线不可用并会复现 4 分半停摆。
+
+**已知限制**
+
+- v1.2.0 存在「互联网共享 / 把有线共享成 WiFi 热点」导致黑屏重启的 bug，作者确认将在
+  v1.2.1 正式版修复（[远景反馈帖](https://bbs.pcbeta.com/viewthread-2084816-1-1.html)）。
+  OCLP 方案下该功能可用 —— 如果依赖热点，请暂缓迁移。
+- 不要使用 `v1.2.1-alpha`；作者已宣布 1.2.1 正式版会改回双 kext 架构。
+- 可选启动参数：`sbcmdelay=<毫秒>` 延迟加载内嵌驱动、`-simplebcmoff` 整体禁用；
+  `-sbcmawdlcc` / `-sbcmdma` 仅对 Tahoe 生效且默认关闭。
+
+官方配置片段、第三方许可与 kext 校验清单见 `Docs/SimpleBCM/`。
 
 
 ---
@@ -145,7 +185,8 @@ verbose 跑完后黑屏 4 分半、verbose 末段输出极慢。
   而容器已被 macOS 15 升级到 `2332.140.13.702.2`。改为 `UEFI -> APFS -> EnableJumpstart = True`
   并停用 `apfs_aligned.efi`，由容器自带的 apfs.efi 提供，版本永远匹配。
 - **4 分半黑屏**：`kernelmanagerd` 在等一个永远匹配不上的 PCIe 设备（无线网卡），
-  详见上面 Wi-Fi 章节。
+  由 OCLP-Mod 方案下 root patch 被系统更新冲掉、驱动缺失引起；本分支改用 SimpleBCM 后
+  不再依赖 root patch，详见上面 Wi-Fi 章节。
 - **verbose 输出慢**：`UEFI -> Output -> Resolution` 原为 `Max`，在 4K 显示器上使 EFI framebuffer
   工作在 3840×2160，内核文字靠软件滚动。改为 `1920x1080@32`。历史日志中唯一的 OpenCore 报错
   `Changed resolution to 0x0@0 ... from Max - Unsupported` 也来自这里。

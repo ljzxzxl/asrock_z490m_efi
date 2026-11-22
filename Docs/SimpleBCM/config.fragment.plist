@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  config.fragment.plist
+  SimpleBCM
+
+  Created by laobamac on 2026/11/1.
+  Copyright © 2026 laobamac. All rights reserved.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Kernel</key>
+	<dict>
+		<key>Add</key>
+		<array>
+			<dict>
+				<key>Arch</key>
+				<string>x86_64</string>
+				<key>BundlePath</key>
+				<string>SimpleBCM.kext</string>
+				<key>Comment</key>
+				<string>SimpleBCM embedded stack</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/SimpleBCM</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+				<key>MinKernel</key>
+				<string>23.0.0</string>
+				<key>MaxKernel</key>
+				<string>25.99.99</string>
+			</dict>
+		</array>
+		<key>Block</key>
+		<array/>
+	</dict>
+</dict>
+</plist>

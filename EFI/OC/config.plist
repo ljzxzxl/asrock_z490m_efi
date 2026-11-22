@@ -557,6 +557,24 @@
 			</dict>
 			<dict>
 				<key>Arch</key>
+				<string>x86_64</string>
+				<key>BundlePath</key>
+				<string>SimpleBCM.kext</string>
+				<key>Comment</key>
+				<string>SimpleBCM 1.2.0 - native Skywalk, no root patch</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string>Contents/MacOS/SimpleBCM</string>
+				<key>MaxKernel</key>
+				<string>25.99.99</string>
+				<key>MinKernel</key>
+				<string>23.0.0</string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
 				<string>AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcmNIC_Injector.kext</string>
@@ -633,9 +651,9 @@
 				<key>BundlePath</key>
 				<string>AMFIPass.kext</string>
 				<key>Comment</key>
-				<string>Only needed where OCLP root patches exist (Sequoia+); inert on Ventura</string>
+				<string>Disabled: only needed for OCLP root patches (SimpleBCM needs none)</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AMFIPass</string>
 				<key>MaxKernel</key>
@@ -651,9 +669,9 @@
 				<key>BundlePath</key>
 				<string>IOSkywalkFamily.kext</string>
 				<key>Comment</key>
-				<string>OCLP wireless: legacy Skywalk family</string>
+				<string>Disabled: OCLP-Mod legacy Skywalk, kept for rollback</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IOSkywalkFamily</string>
 				<key>MaxKernel</key>
@@ -669,9 +687,9 @@
 				<key>BundlePath</key>
 				<string>IO80211FamilyLegacy.kext</string>
 				<key>Comment</key>
-				<string>OCLP wireless: legacy IO80211 family</string>
+				<string>Disabled: OCLP-Mod legacy IO80211, kept for rollback</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/IO80211FamilyLegacy</string>
 				<key>MaxKernel</key>
@@ -687,9 +705,9 @@
 				<key>BundlePath</key>
 				<string>IO80211FamilyLegacy.kext/Contents/PlugIns/AirPortBrcmNIC.kext</string>
 				<key>Comment</key>
-				<string>OCLP wireless: provides com.apple.driver.AirPort.BrcmNIC for BCM4352</string>
+				<string>Disabled: OCLP-Mod AirPortBrcmNIC, kept for rollback</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/AirPortBrcmNIC</string>
 				<key>MaxKernel</key>
@@ -706,9 +724,9 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>Comment</key>
-				<string>Exclude OS Skywalk so IO80211FamilyLegacy can load</string>
+				<string>Disabled: native IOSkywalkFamily must load for SimpleBCM</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Identifier</key>
 				<string>com.apple.iokit.IOSkywalkFamily</string>
 				<key>MaxKernel</key>
@@ -970,7 +988,7 @@
 				<string>-v debug=0x100 keepsyms=1 agdpmod=pikera brcmfx-driver=2 brcmfx-country=#a</string>
 				<key>csr-active-config</key>
 				<data>
-				AwoAAA==
+				AwgAAA==
 				</data>
 				<key>prev-lang:kbd</key>
 				<data>
