@@ -56,14 +56,38 @@ fi
 # 4. ESP 检查与空间检查
 [ -f "$ESP/OC/config.plist" ] || fail "ESP 上找不到 OC/config.plist。请先挂载 EFI 分区（Tools/Install-MountEFI.sh），或用 ESP_PATH 指定正确路径。"
 [ -w "$ESP" ] || fail "ESP 不可写: $ESP"
-FREE_MB="$(df -m "$ESP" | tail -1 | awk '{print $4}')"
-[ "${FREE_MB:-0}" -ge 120 ] || fail "ESP 可用空间不足 120MB（当前 ${FREE_MB}MB），无法安全备份。"
 
-# 5. 整份备份
-TS="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$(dirname "$ESP")/EFI-Backup-$TS"
-printf '备份现有 EFI -> %s\n' "$BACKUP"
-cp -a "$ESP" "$BACKUP"
+# 优先复用 ESP 上已有的完整 EFI 备份，避免 ESP（通常仅 200MB）被多份备份占满。
+# 需要为当前状态单独留快照时，设置 NEW_BACKUP=1；也可用 REUSE_BACKUP 指定某一份。
+BACKUP="${REUSE_BACKUP:-}"
+if [ -z "$BACKUP" ] && [ "${NEW_BACKUP:-0}" != "1" ]; then
+  for candidate in $(ls -1dt "$(dirname "$ESP")"/EFI-Backup-* 2>/dev/null); do
+    if [ -f "$candidate/OC/config.plist" ] && [ -f "$candidate/BOOT/BOOTx64.efi" ]; then
+      BACKUP="$candidate"
+      break
+    fi
+  done
+fi
+NEED_MB=0
+if [ -n "$BACKUP" ]; then
+  printf '复用已有 ESP 备份（不再新建）: %s\n' "$BACKUP"
+else
+  NEED_MB="$(du -sm "$ESP" | awk '{print $1}')"
+  TS="$(date +%Y%m%d-%H%M%S)"
+  BACKUP="$(dirname "$ESP")/EFI-Backup-$TS"
+  printf '将新建备份: %s (约 %sMB)\n' "$BACKUP" "$NEED_MB"
+fi
+
+FREE_MB="$(df -m "$ESP" | tail -1 | awk '{print $4}')"
+REQUIRED_MB=$((NEED_MB + 20))
+[ "${FREE_MB:-0}" -ge "$REQUIRED_MB" ] || \
+  fail "ESP 可用空间不足（当前 ${FREE_MB}MB，需要约 ${REQUIRED_MB}MB）。可清理 ESP 上的旧 opencore-*.txt 日志或旧 EFI-Backup 目录，或设置 REUSE_BACKUP=<已有备份目录>。"
+
+# 5. 整份备份（cp -R 适配 FAT32；不新建时跳过）
+if [ ! -f "$BACKUP/OC/config.plist" ]; then
+  printf '备份现有 EFI -> %s\n' "$BACKUP"
+  cp -R "$ESP" "$BACKUP"
+fi
 [ -f "$BACKUP/OC/config.plist" ] || fail "备份校验失败"
 
 # 6. 同步（不使用 --delete，保留 ESP 上的 config 备份、日志与 .comate 文档）

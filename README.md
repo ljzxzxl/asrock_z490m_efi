@@ -141,9 +141,10 @@ Sequoia / Tahoe 上有实机成功案例。
 2. 重启，确认 `diskutil apfs list` 中 `Snapshot Sealed: Yes`。
 3. 再执行 `Tools/Apply-SimpleBCM-EFI.sh`（脚本会强制检查封印状态，未恢复则拒绝同步）。
 
-脚本会先整份备份 ESP 上的 EFI，再同步 `BOOT/` 与 `OC/`（不删除 ESP 上已有的 config
-备份、日志与 `.comate` 文档），最后校验 `config.plist` 与 kext 完整性。
-重置 NVRAM 后重启即可让 `csr=0x803` 生效。
+脚本会复用 ESP 上已有的完整 EFI 备份（ESP 通常只有 200MB，避免多份备份占满空间；
+可用 `NEW_BACKUP=1` 强制新建、`REUSE_BACKUP=<目录>` 指定某一份），再同步 `BOOT/` 与 `OC/`
+（不删除 ESP 上已有的 config 备份、日志与 `.comate` 文档），最后校验 `config.plist`
+与 kext 完整性。重置 NVRAM 后重启即可让 `csr=0x803` 生效。
 
 **验证清单**
 
